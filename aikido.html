@@ -1,0 +1,682 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<html translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Esame Aikido - Do Samurai Lucca</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-sub: #b3b3b3;
+            --accent: #3498db;
+            --listening-color: #2ecc71;
+            --waiting-color: #e67e22;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Schermata di Selezione */
+        #selection-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        h2 {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: var(--accent);
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-options {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .option-title {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .toggle-container {
+            display: flex;
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            padding: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .grid-gradi {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn-grado {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 2px solid #2d2d2d;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+
+        .btn-grado:active {
+            transform: scale(0.95);
+            border-color: var(--accent);
+        }
+
+        /* Schermata Allenamento (A tutto schermo) */
+        #training-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            padding: 20px;
+            justify-content: space-between;
+            transition: border 0.3s ease;
+            border: 0px solid transparent;
+        }
+
+        /* Stati del feedback visivo tramite bordo */
+        #training-screen.listening {
+            animation: pulse-border-green 1.5s infinite;
+        }
+
+        #training-screen.speaking {
+            border: 8px solid var(--waiting-color);
+        }
+
+        @keyframes pulse-border-green {
+            0% { border: 8px solid rgba(46, 204, 113, 0.4); }
+            50% { border: 8px solid rgba(46, 204, 113, 1); }
+            100% { border: 8px solid rgba(46, 204, 113, 0.4); }
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .info-esame {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            background: #2d2d2d;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .btn-esci {
+            background: #cc0000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .contenuto-tecnica {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            padding: 10px 0;
+        }
+
+        .waza {
+            font-size: 2.2rem;
+            font-weight: 300;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .attacco {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .tecnica {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--text-main);
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .bottom-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge.ascolto {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--listening-color);
+        }
+
+        .status-badge.parla {
+            background-color: rgba(230, 126, 34, 0.2);
+            color: var(--waiting-color);
+        }
+
+        .hint-touch {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            animation: pulse-text 2s infinite;
+        }
+
+        @keyframes pulse-text {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="selection-screen">
+        <h1>AIKIDO EXAM</h1>
+        <h2>Do Samurai Lucca</h2>
+
+        <div class="menu-options">
+            <div class="option-title">Modalità di estrazione:</div>
+            <div class="toggle-container">
+                <button id="btn-seq" class="toggle-btn active" onclick="setModalita('SEQ')">SEQUENZIALE</button>
+                <button id="btn-rand" class="toggle-btn" onclick="setModalita('RAND')">CASUALE (RANDOM)</button>
+            </div>
+        </div>
+
+        <div class="grid-gradi">
+            <button class="btn-grado" onclick="avviaAllenamento('6_kyu')">VI KYU</button>
+            <button class="btn-grado" onclick="avviaAllenamento('5_kyu')">V KYU</button>
+            <button class="btn-grado" onclick="avviaAllenamento('4_kyu')">IV KYU</button>
+            <button class="btn-grado" onclick="avviaAllenamento('3_kyu')">III KYU</button>
+            <button class="btn-grado" onclick="avviaAllenamento('2_kyu')">II KYU</button>
+            <button class="btn-grado" onclick="avviaAllenamento('1_kyu')">I KYU</button>
+        </div>
+    </div>
+
+    <div id="training-screen" onclick="gestisciTouch()">
+        <div class="top-bar">
+            <span id="info-progresso" class="info-esame">VI Kyu - 1/12</span>
+            <button class="btn-esci" onclick="uscire(event)">ESCI</button>
+        </div>
+
+        <div class="contenuto-tecnica">
+            <div id="display-waza" class="waza">Suwari Waza</div>
+            <div id="display-attacco" class="attacco">Katate Dori</div>
+            <div id="display-tecnica" class="tecnica">Ikkyo</div>
+        </div>
+
+        <div class="bottom-bar">
+            <div id="status-mic" class="status-badge ascolto">
+                <span>●</span> IN ASCOLTO (Pronuncia "OK")
+            </div>
+            <div class="hint-touch">oppure tocca un punto qualsiasi dello schermo</div>
+        </div>
+    </div>
+
+    <script>
+        // Database completo delle tecniche del documento ufficiale
+        const programmaEsami = {
+            "6_kyu": {
+                nome: "VI Kyu",
+                tecniche: [
+                    { waza: "Suwari Waza", attacco: "Ryote Dori", tecnica: "Kokyu Ho" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Ryote Dori", tecnica: "Tenchi Nage" }
+                ]
+            },
+            "5_kyu": {
+                nome: "V Kyu",
+                tecniche: [
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Ikkyo" },
+                    { waza: "Suwari Waza", attacco: "Aihanmi Katate Dori", tecnica: "Ikkyo" },
+                    { waza: "Suwari Waza", attacco: "Aihanmi Katate Dori", tecnica: "Irimi Nage" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Katate Dori", tecnica: "Kokyu Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Tenchi Nage" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Ude Kime Nage" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Ikkyo" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Kokyu Nage" }
+                ]
+            },
+            "4_kyu": {
+                nome: "IV Kyu",
+                tecniche: [
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Nikyo" },
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Suwari Waza", attacco: "Katate Dori", tecnica: "Ikkyo" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Katate Dori", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Aihanmi Katate Dori", tecnica: "Ude Kime Nage" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Sokumen Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Kata Dori", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Kata Dori", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Ude Kime Nage" },
+                    { waza: "Tachi Waza", attacco: "Ryote Dori", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Ryote Dori", tecnica: "Sankyo" }
+                ]
+            },
+            "3_kyu": {
+                nome: "III Kyu",
+                tecniche: [
+                    { waza: "Suwari Waza", attacco: "Kata Dori", tecnica: "Ikkyo" },
+                    { waza: "Suwari Waza", attacco: "Kata Dori", tecnica: "Nikyo" },
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Sankyo" },
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Yonkyo" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Katate Dori", tecnica: "Ikkyo" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Ryote Dori", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Yonkyo" },
+                    { waza: "Tachi Waza", attacco: "Katate Ryote Dori", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Katate Ryote Dori", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Uchi Kaiten Nage" },
+                    { waza: "Tachi Waza", attacco: "Ryote Dori", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Ryote Dori", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Ryote Dori", tecnica: "Kokyu Nage" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Kokyu Nage" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Ude Kime Nage" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Shiho Nage" }
+                ]
+            },
+            "2_kyu": {
+                nome: "II Kyu",
+                tecniche: [
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Ikkyo" },
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Nikyo" },
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Sankyo" },
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Yonkyo" },
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Gokyo" },
+                    { waza: "Suwari Waza", attacco: "Kata Dori", tecnica: "Sankyo" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Katate Dori", tecnica: "Uchi Kaiten Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Soto Kaiten Nage" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Uchi Kaiten Nage" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Kokyu Nage" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Yonkyo" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Sumi Otoshi" },
+                    { waza: "Tachi Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Koshi Nage" },
+                    { waza: "Tachi Waza", attacco: "Kata Dori", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Kata Dori", tecnica: "Yonkyo" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Yonkyo" },
+                    { waza: "Tachi Waza", attacco: "Yokomen Uchi", tecnica: "Gokyo" },
+                    { waza: "Tachi Waza", attacco: "Chudan Tsuki", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Chudan Tsuki", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Hiji Kime Osae" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Kokyu Nage" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Kote Gaeshi" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Irimi Nage" },
+                    { waza: "Ushiro Waza", attacco: "Hiji Dori", tecnica: "Ikkyo" },
+                    { waza: "Ushiro Waza", attacco: "Shomen Uchi", tecnica: "Uchi Kaiten Nage" },
+                    { waza: "Ushiro Waza", attacco: "Shomen Uchi", tecnica: "Sankyo" },
+                    { waza: "Ushiro Waza", attacco: "Shomen Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Ushiro Waza", attacco: "Shomen Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Ushiro Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Shiho Nage" },
+                    { waza: "Ushiro Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Kote Gaeshi" },
+                    { waza: "Ushiro Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Ude Kime Nage" },
+                    { waza: "Ushiro Waza", attacco: "Gyaku hanmi Katate Dori", tecnica: "Irimi Nage" }
+                ]
+            },
+            "1_kyu": {
+                nome: "I Kyu",
+                tecniche: [
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Suwari Waza", attacco: "Shomen Uchi", tecnica: "Gokyo" },
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Suwari Waza", attacco: "Yokomen Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Katate Dori", tecnica: "Nikyo" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Shomen Uchi", tecnica: "Ikkyo" },
+                    { waza: "Hanmi Handachi Waza", attacco: "Shomen Uchi", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Shomen Uchi", tecnica: "Gokyo" },
+                    { waza: "Tachi Waza", attacco: "Chudan Tsuki", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Chudan Tsuki", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Katadori Men Uchi", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Nikyo" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Sankyo" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Shiho Nage" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Irimi Nage" },
+                    { waza: "Tachi Waza", attacco: "Jodan Tsuki", tecnica: "Kaiten Nage" },
+                    { waza: "Tachi Waza", attacco: "Katate Dori Kubi Shime", tecnica: "Ikkyo" },
+                    { waza: "Tachi Waza", attacco: "Katate Ryote Dori", tecnica: "Kote Gaeshi" },
+                    { waza: "Tachi Waza", attacco: "Katate Ryote Dori", tecnica: "Ude Kime Nage" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Koshi Nage" },
+                    { waza: "Ushiro Waza", attacco: "Ryote Dori", tecnica: "Aiki Otoshi" }
+                ]
+            }
+        };
+
+        // Stato dell'applicazione
+        let modalitaCorrente = 'SEQ'; // 'SEQ' o 'RAND'
+        let listaTecnicheSessione = [];
+        let indiceCorrente = 0;
+        let gradoAttivo = "";
+
+        // Istanza del Riconoscimento Vocale
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isListening = false;
+        let bloccoAvanzamento = false; // Evita avanzamenti doppi rapidi (voce + touch)
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.lang = 'it-IT';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = function(event) {
+                const ultimoRisultatoIndex = event.results.length - 1;
+                const testoMasticato = event.results[ultimoRisultatoIndex][0].transcript.trim().toLowerCase();
+                console.log("Riconosciuto vocale:", testoMasticato);
+
+                // Controllo se è stata detta la parola chiave "ok"
+                if (testoMasticato.includes('ok')) {
+                    avanzaTecnica();
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Errore Speech Recognition:", event.error);
+                // Se si interrompe per inattività, lo rilanciamo se siamo in modalità allenamento
+                if (event.error === 'not-allowed') {
+                    alert("Per favore, consenti l'uso del microfono per i comandi vocali.");
+                    disattivaVisualeAscolto();
+                }
+            };
+
+            recognition.onend = function() {
+                // Se l'allenamento è ancora attivo, riavviamo l'ascolto continuo
+                if (isListening && document.getElementById('training-screen').style.display === 'flex') {
+                    try { recognition.start(); } catch(e) {}
+                }
+            };
+        } else {
+            console.warn("Riconoscimento vocale non supportato in questo browser.");
+            document.getElementById('status-mic').innerHTML = "⚠️ Comandi vocali non supportati su questo browser";
+            document.getElementById('status-mic').style.backgroundColor = "rgba(231, 76, 60, 0.2)";
+            document.getElementById('status-mic').style.color = "#e74c3c";
+        }
+
+        function setModalita(mod) {
+            modalitaCorrente = mod;
+            document.getElementById('btn-seq').classList.toggle('active', mod === 'SEQ');
+            document.getElementById('btn-rand').classList.toggle('active', mod === 'RAND');
+        }
+
+        function avviaAllenamento(idGrado) {
+            gradoAttivo = idGrado;
+            const datiGrado = programmaEsami[idGrado];
+            // Cloniamo l'array originale
+            listaTecnicheSessione = [...datiGrado.tecniche];
+
+            // Se la modalità è Random, mescoliamo l'ordine degli elementi
+            if (modalitaCorrente === 'RAND') {
+                listaTecnicheSessione.sort(() => Math.random() - 0.5);
+            }
+
+            indiceCorrente = 0;
+            
+            // Cambio Schermata
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('training-screen').style.display = 'flex';
+
+            // Mostra e Parla la prima tecnica
+            mostraElementoCorrente();
+
+            // Attivazione del Microfono
+            attivaRiconoscimentoVocale();
+        }
+
+        function mostraElementoCorrente() {
+            if (indiceCorrente >= listaTecnicheSessione.length) {
+                fineProgramma();
+                return;
+            }
+
+            const item = listaTecnicheSessione[indiceCorrente];
+            const nomeGradoCompleto = programmaEsami[gradoAttivo].nome;
+
+            // Aggiorna UI
+            document.getElementById('info-progresso').innerText = `${nomeGradoCompleto} - ${indiceCorrente + 1}/${listaTecnicheSessione.length}`;
+            document.getElementById('display-waza').innerText = item.waza;
+            document.getElementById('display-attacco').innerText = item.attacco;
+            document.getElementById('display-tecnica').innerText = item.tecnica;
+
+            // Pronuncia Vocale (Text to Speech)
+            pronunciaTecnica(item.waza, item.attacco, item.tecnica);
+        }
+
+        function pronunciaTecnica(waza, attacco, tecnica) {
+            if ('speechSynthesis' in window) {
+                // Se stava parlando, interrompi immediatamente
+                window.speechSynthesis.cancel();
+
+                // Cambia temporaneamente il feedback visivo sul bordo (Arancione = Sto parlando io)
+                attivaVisualeParlata();
+
+                // Costruisci la frase da dire in modo naturale
+                const testoDaDire = `${waza}. ${attacco}. ${tecnica}.`;
+                const utterance = new SpeechSynthesisUtterance(testoDaDire);
+                utterance.lang = 'it-IT';
+                utterance.rate = 0.9; // Leggermente più lento per scandire bene i termini giapponesi
+
+                utterance.onend = function() {
+                    // Finita la parlata, rimetti il bordo verde pulsante dell'ascolto
+                    attivaVisualeAscolto();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                attivaVisualeAscolto();
+            }
+        }
+
+        function avanzaTecnica() {
+            if (bloccoAvanzamento) return;
+            bloccoAvanzamento = true;
+
+            indiceCorrente++;
+            mostraElementoCorrente();
+
+            // Sblocca dopo un piccolo delay per evitare skip multipli involontari
+            setTimeout(() => {
+                bloccoAvanzamento = false;
+            }, 600);
+        }
+
+        function gestisciTouch() {
+            // Un tap sullo schermo avanza alla tecnica successiva
+            avanzaTecnica();
+        }
+
+        function attivaRiconoscimentoVocale() {
+            if (recognition) {
+                isListening = true;
+                try {
+                    recognition.start();
+                } catch (e) {
+                    // Già avviato
+                }
+            }
+        }
+
+        function disattivaRiconoscimentoVocale() {
+            isListening = false;
+            if (recognition) {
+                try { recognition.stop(); } catch(e) {}
+            }
+        }
+
+        function attivaVisualeParlata() {
+            const screen = document.getElementById('training-screen');
+            screen.classList.remove('listening');
+            screen.classList.add('speaking');
+            
+            const badge = document.getElementById('status-mic');
+            if (recognition) {
+                badge.className = "status-badge parla";
+                badge.innerHTML = "<span>●</span> ENUNCIAZIONE TECNICA...";
+            }
+        }
+
+        function attivaVisualeAscolto() {
+            const screen = document.getElementById('training-screen');
+            screen.classList.remove('speaking');
+            screen.classList.add('listening');
+
+            const badge = document.getElementById('status-mic');
+            if (recognition) {
+                badge.className = "status-badge ascolto";
+                badge.innerHTML = "<span>●</span> IN ASCOLTO (Pronuncia 'OK')";
+            }
+        }
+
+        function disattivaVisualeAscolto() {
+            const screen = document.getElementById('training-screen');
+            screen.classList.remove('speaking', 'listening');
+        }
+
+        function fineProgramma() {
+            disattivaRiconoscimentoVocale();
+            disattivaVisualeAscolto();
+            if ('speechSynthesis' in window) {
+                const fineUtterance = new SpeechSynthesisUtterance("Programma completato! Ottimo lavoro.");
+                fineUtterance.lang = 'it-IT';
+                window.speechSynthesis.speak(fineUtterance);
+            }
+            alert("Complimenti! Hai completato tutte le tecniche del modulo.");
+            tornaAlMenu();
+        }
+
+        function uscire(event) {
+            // Evita che il click sul bottone Esci attivi anche il touch di sfondo dello schermo intero
+            if (event) event.stopPropagation(); 
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            tornaAlMenu();
+        }
+
+        function tornaAlMenu() {
+            disattivaRiconoscimentoVocale();
+            disattivaVisualeAscolto();
+            document.getElementById('training-screen').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
