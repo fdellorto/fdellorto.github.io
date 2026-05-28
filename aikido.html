@@ -12,8 +12,6 @@
             --text-main: #ffffff;
             --text-sub: #b3b3b3;
             --accent: #3498db;
-            --listening-color: #2ecc71;
-            --waiting-color: #e67e22;
         }
 
         * {
@@ -127,7 +125,7 @@
             border-color: var(--accent);
         }
 
-        /* Schermata Allenamento (A tutto schermo) */
+        /* Schermata Allenamento */
         #training-screen {
             display: none;
             flex-direction: column;
@@ -135,23 +133,6 @@
             position: relative;
             padding: 20px;
             justify-content: space-between;
-            transition: border 0.3s ease;
-            border: 0px solid transparent;
-        }
-
-        /* Stati del feedback visivo tramite bordo */
-        #training-screen.listening {
-            animation: pulse-border-green 1.5s infinite;
-        }
-
-        #training-screen.speaking {
-            border: 8px solid var(--waiting-color);
-        }
-
-        @keyframes pulse-border-green {
-            0% { border: 8px solid rgba(46, 204, 113, 0.4); }
-            50% { border: 8px solid rgba(46, 204, 113, 1); }
-            100% { border: 8px solid rgba(46, 204, 113, 0.4); }
         }
 
         .top-bar {
@@ -222,30 +203,11 @@
             align-items: center;
             gap: 10px;
             width: 100%;
-        }
-
-        .status-badge {
-            font-size: 0.9rem;
-            padding: 6px 16px;
-            border-radius: 15px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-badge.ascolto {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: var(--listening-color);
-        }
-
-        .status-badge.parla {
-            background-color: rgba(230, 126, 34, 0.2);
-            color: var(--waiting-color);
+            margin-bottom: 20px;
         }
 
         .hint-touch {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             color: var(--text-sub);
             animation: pulse-text 2s infinite;
         }
@@ -294,15 +256,11 @@
         </div>
 
         <div class="bottom-bar">
-            <div id="status-mic" class="status-badge ascolto">
-                <span>●</span> IN ASCOLTO (Pronuncia "OK")
-            </div>
-            <div class="hint-touch">oppure tocca un punto qualsiasi dello schermo</div>
+            <div class="hint-touch">Tocca un punto qualsiasi per avanzare</div>
         </div>
     </div>
 
     <script>
-        // Database completo delle tecniche del documento ufficiale
         const programmaEsami = {
             "6_kyu": {
                 nome: "VI Kyu",
@@ -460,86 +418,41 @@
             }
         };
 
-        // Stato dell'applicazione
-        let modalitaCorrente = 'SEQ'; // 'SEQ' o 'RAND'
+        let modalitaCorrente = 'SEQ'; 
         let listaTecnicheSessione = [];
         let indiceCorrente = 0;
         let gradoAttivo = "";
+        let bloccoAvanzamento = false; 
 
-        // Istanza del Riconoscimento Vocale
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-        let isListening = false;
-        let bloccoAvanzamento = false; // Evita avanzamenti doppi rapidi (voce + touch)
-
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.lang = 'it-IT';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onresult = function(event) {
-                const ultimoRisultatoIndex = event.results.length - 1;
-                const testoMasticato = event.results[ultimoRisultatoIndex][0].transcript.trim().toLowerCase();
-                console.log("Riconosciuto vocale:", testoMasticato);
-
-                // Controllo se è stata detta la parola chiave "ok"
-                if (testoMasticato.includes('ok')) {
-                    avanzaTecnica();
-                }
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Errore Speech Recognition:", event.error);
-                // Se si interrompe per inattività, lo rilanciamo se siamo in modalità allenamento
-                if (event.error === 'not-allowed') {
-                    alert("Per favore, consenti l'uso del microfono per i comandi vocali.");
-                    disattivaVisualeAscolto();
-                }
-            };
-
-            recognition.onend = function() {
-                // Se l'allenamento è ancora attivo, riavviamo l'ascolto continuo
-                if (isListening && document.getElementById('training-screen').style.display === 'flex') {
-                    try { recognition.start(); } catch(e) {}
-                }
-            };
-        } else {
-            console.warn("Riconoscimento vocale non supportato in questo browser.");
-            document.getElementById('status-mic').innerHTML = "⚠️ Comandi vocali non supportati su questo browser";
-            document.getElementById('status-mic').style.backgroundColor = "rgba(231, 76, 60, 0.2)";
-            document.getElementById('status-mic').style.color = "#e74c3c";
+        function triggerHaptic() {
+            if (navigator.vibrate) {
+                navigator.vibrate(15); 
+            }
         }
 
         function setModalita(mod) {
+            triggerHaptic();
             modalitaCorrente = mod;
             document.getElementById('btn-seq').classList.toggle('active', mod === 'SEQ');
             document.getElementById('btn-rand').classList.toggle('active', mod === 'RAND');
         }
 
         function avviaAllenamento(idGrado) {
+            triggerHaptic();
             gradoAttivo = idGrado;
             const datiGrado = programmaEsami[idGrado];
-            // Cloniamo l'array originale
             listaTecnicheSessione = [...datiGrado.tecniche];
 
-            // Se la modalità è Random, mescoliamo l'ordine degli elementi
             if (modalitaCorrente === 'RAND') {
                 listaTecnicheSessione.sort(() => Math.random() - 0.5);
             }
 
             indiceCorrente = 0;
-           
-            // Cambio Schermata
+            
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('training-screen').style.display = 'flex';
 
-            // Mostra e Parla la prima tecnica
             mostraElementoCorrente();
-
-            // Attivazione del Microfono
-            attivaRiconoscimentoVocale();
         }
 
         function mostraElementoCorrente() {
@@ -551,128 +464,41 @@
             const item = listaTecnicheSessione[indiceCorrente];
             const nomeGradoCompleto = programmaEsami[gradoAttivo].nome;
 
-            // Aggiorna UI
             document.getElementById('info-progresso').innerText = `${nomeGradoCompleto} - ${indiceCorrente + 1}/${listaTecnicheSessione.length}`;
             document.getElementById('display-waza').innerText = item.waza;
             document.getElementById('display-attacco').innerText = item.attacco;
             document.getElementById('display-tecnica').innerText = item.tecnica;
-
-            // Pronuncia Vocale (Text to Speech)
-            pronunciaTecnica(item.waza, item.attacco, item.tecnica);
-        }
-
-        function pronunciaTecnica(waza, attacco, tecnica) {
-            if ('speechSynthesis' in window) {
-                // Se stava parlando, interrompi immediatamente
-                window.speechSynthesis.cancel();
-
-                // Cambia temporaneamente il feedback visivo sul bordo (Arancione = Sto parlando io)
-                attivaVisualeParlata();
-
-                // Costruisci la frase da dire in modo naturale
-                const testoDaDire = `${waza}. ${attacco}. ${tecnica}.`;
-                const utterance = new SpeechSynthesisUtterance(testoDaDire);
-                utterance.lang = 'it-IT';
-                utterance.rate = 0.9; // Leggermente più lento per scandire bene i termini giapponesi
-
-                utterance.onend = function() {
-                    // Finita la parlata, rimetti il bordo verde pulsante dell'ascolto
-                    attivaVisualeAscolto();
-                };
-
-                window.speechSynthesis.speak(utterance);
-            } else {
-                attivaVisualeAscolto();
-            }
         }
 
         function avanzaTecnica() {
             if (bloccoAvanzamento) return;
             bloccoAvanzamento = true;
+            triggerHaptic();
 
             indiceCorrente++;
             mostraElementoCorrente();
 
-            // Sblocca dopo un piccolo delay per evitare skip multipli involontari
             setTimeout(() => {
                 bloccoAvanzamento = false;
-            }, 600);
+            }, 400);
         }
 
         function gestisciTouch() {
-            // Un tap sullo schermo avanza alla tecnica successiva
             avanzaTecnica();
         }
 
-        function attivaRiconoscimentoVocale() {
-            if (recognition) {
-                isListening = true;
-                try {
-                    recognition.start();
-                } catch (e) {
-                    // Già avviato
-                }
-            }
-        }
-
-        function disattivaRiconoscimentoVocale() {
-            isListening = false;
-            if (recognition) {
-                try { recognition.stop(); } catch(e) {}
-            }
-        }
-
-        function attivaVisualeParlata() {
-            const screen = document.getElementById('training-screen');
-            screen.classList.remove('listening');
-            screen.classList.add('speaking');
-           
-            const badge = document.getElementById('status-mic');
-            if (recognition) {
-                badge.className = "status-badge parla";
-                badge.innerHTML = "<span>●</span> ENUNCIAZIONE TECNICA...";
-            }
-        }
-
-        function attivaVisualeAscolto() {
-            const screen = document.getElementById('training-screen');
-            screen.classList.remove('speaking');
-            screen.classList.add('listening');
-
-            const badge = document.getElementById('status-mic');
-            if (recognition) {
-                badge.className = "status-badge ascolto";
-                badge.innerHTML = "<span>●</span> IN ASCOLTO (Pronuncia 'OK')";
-            }
-        }
-
-        function disattivaVisualeAscolto() {
-            const screen = document.getElementById('training-screen');
-            screen.classList.remove('speaking', 'listening');
-        }
-
         function fineProgramma() {
-            disattivaRiconoscimentoVocale();
-            disattivaVisualeAscolto();
-            if ('speechSynthesis' in window) {
-                const fineUtterance = new SpeechSynthesisUtterance("Programma completato! Ottimo lavoro.");
-                fineUtterance.lang = 'it-IT';
-                window.speechSynthesis.speak(fineUtterance);
-            }
             alert("Complimenti! Hai completato tutte le tecniche del modulo.");
             tornaAlMenu();
         }
 
         function uscire(event) {
-            // Evita che il click sul bottone Esci attivi anche il touch di sfondo dello schermo intero
-            if (event) event.stopPropagation();
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (event) event.stopPropagation(); 
+            triggerHaptic();
             tornaAlMenu();
         }
 
         function tornaAlMenu() {
-            disattivaRiconoscimentoVocale();
-            disattivaVisualeAscolto();
             document.getElementById('training-screen').style.display = 'none';
             document.getElementById('selection-screen').style.display = 'flex';
         }
